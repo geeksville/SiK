@@ -1,0 +1,267 @@
+problem of lost radio status msgs:
+
+Can't see problem when using mavproxy on both sides
+HB/RAD/STAT 757 758 758
+HB/RAD/STAT 758 759 759
+HB/RAD/STAT 759 760 760
+
+But when talking to APM we occasionally see a problem (here we've missed sending radio packets twice after the heartbeat)
+HB/RAD/STAT 574 571 571
+HB/RAD/STAT 575 572 572
+HB/RAD/STAT 576 573 573
+HB/RAD/STAT 577 574 574
+
+
+
+----
+
+# works with no opportunistic resend
+tools/mavtester.py --port1=/dev/ttyUSB0 --port2=/dev/ttyUSB1 --rate=4
+kevinh@kevin-xeralaptop:~/development/drone/SiK/Firmware$ tools/mavtester.py --port1=/dev/ttyUSB0 --port2=/dev/ttyUSB1 --rate=4
+Veh:51/6/0  GCS:0/36/36  pend:15 rates:0/1500 lat:0/0/0 bad:0/0 txbuf:97/100
+Veh:119/16/2  GCS:2/95/93  pend:26 rates:43/2000 lat:44/44/44 bad:0/0 txbuf:84/100
+Veh:187/26/4  GCS:4/156/152  pend:35 rates:43/2000 lat:44/65/54 bad:0/0 txbuf:93/100
+Veh:255/36/6  GCS:6/214/208  pend:47 rates:43/2000 lat:44/65/57 bad:0/0 txbuf:95/100
+Veh:323/46/8  GCS:8/273/265  pend:58 rates:43/2000 lat:44/67/59 bad:0/0 txbuf:97/100
+Veh:391/56/10  GCS:10/331/321  pend:70 rates:43/2000 lat:44/67/58 bad:0/0 txbuf:90/100
+Veh:459/66/12  GCS:12/389/377  pend:82 rates:43/2000 lat:44/67/58 bad:0/0 txbuf:94/100
+Veh:527/76/14  GCS:14/449/435  pend:92 rates:43/2000 lat:44/67/58 bad:0/0 txbuf:96/100
+Veh:595/86/16  GCS:16/511/495  pend:100 rates:43/2000 lat:44/67/59 bad:0/0 txbuf:93/100
+Veh:663/96/18  GCS:18/565/547  pend:116 rates:43/2000 lat:44/67/57 bad:0/0 txbuf:94/100
+Veh:731/104/20  GCS:20/624/604  pend:127 rates:43/2000 lat:38/67/55 bad:0/0 txbuf:89/100
+Veh:782/114/22  GCS:22/685/663  pend:119 rates:43/1500 lat:38/67/54 bad:0/0 txbuf:96/100
+Veh:850/124/24  GCS:24/741/717  pend:133 rates:43/2000 lat:38/67/53 bad:0/0 txbuf:84/100
+Veh:918/134/26  GCS:26/792/766  pend:152 rates:43/2000 lat:38/106/57 bad:0/0 txbuf:88/100
+Veh:986/144/28  GCS:28/844/816  pend:170 rates:43/2000 lat:38/106/55 bad:0/0 txbuf:97/98
+Veh:1054/154/30  GCS:30/901/871  pend:183 rates:43/2000 lat:35/106/54 bad:0/0 txbuf:96/98
+Veh:1122/164/32  GCS:32/955/923  pend:199 rates:43/2000 lat:32/106/53 bad:0/0 txbuf:91/98
+Veh:1190/174/34  GCS:34/1012/978  pend:212 rates:43/2000 lat:32/106/51 bad:0/0 txbuf:95/98
+Veh:1258/184/36  GCS:36/1064/1028  pend:230 rates:43/2000 lat:32/106/50 bad:0/0 txbuf:85/98
+Veh:1326/194/38  GCS:38/1113/1075  pend:251 rates:43/2000 lat:32/106/49 bad:0/0 txbuf:90/98
+Veh:1394/204/40  GCS:40/1166/1126  pend:268 rates:43/2000 lat:32/106/52 bad:0/0 txbuf:91/100
+Veh:1462/213/42  GCS:42/1224/1182  pend:280 rates:43/2000 lat:32/106/55 bad:0/0 txbuf:88/100
+Veh:1530/222/44  GCS:44/1280/1236  pend:294 rates:43/2000 lat:32/106/57 bad:0/0 txbuf:88/100
+Veh:1598/232/46  GCS:46/1333/1287  pend:311 rates:43/2000 lat:32/106/58 bad:0/0 txbuf:86/100
+Veh:1649/242/48  GCS:48/1393/1345  pend:304 rates:43/1500 lat:32/106/59 bad:0/0 txbuf:86/100
+Veh:1717/252/50  GCS:50/1451/1401  pend:316 rates:43/2000 lat:32/106/60 bad:0/0 txbuf:93/100
+Veh:1785/262/52  GCS:52/1500/1448  pend:337 rates:43/2000 lat:32/106/61 bad:0/9 txbuf:85/100
+Veh:1853/272/54  GCS:54/1556/1502  pend:351 rates:43/2000 lat:32/106/62 bad:0/9 txbuf:89/100
+Veh:1921/282/56  GCS:56/1617/1561  pend:360 rates:43/2000 lat:32/106/63 bad:0/9 txbuf:93/100
+Veh:1989/292/58  GCS:58/1677/1619  pend:370 rates:43/2000 lat:32/106/64 bad:0/9 txbuf:88/100
+Veh:2057/302/60  GCS:60/1737/1677  pend:380 rates:43/2000 lat:32/106/65 bad:0/9 txbuf:96/100
+Veh:2125/312/62  GCS:62/1794/1732  pend:393 rates:43/2000 lat:32/106/65 bad:0/9 txbuf:86/100
+Veh:2193/322/64  GCS:64/1858/1794  pend:399 rates:43/2000 lat:32/106/66 bad:0/9 txbuf:93/100
+Veh:2261/332/66  GCS:66/1917/1851  pend:410 rates:43/2000 lat:32/106/67 bad:0/9 txbuf:86/100
+Veh:2329/342/68  GCS:68/1981/1913  pend:416 rates:43/2000 lat:32/106/67 bad:0/9 txbuf:96/100
+Veh:2397/352/70  GCS:70/2044/1974  pend:423 rates:43/2000 lat:32/106/67 bad:0/9 txbuf:96/100
+Veh:2465/362/72  GCS:72/2111/2039  pend:426 rates:43/2000 lat:32/106/67 bad:0/9 txbuf:93/100
+Veh:2533/370/74  GCS:74/2167/2093  pend:440 rates:43/2000 lat:32/106/67 bad:0/9 txbuf:90/100
+Veh:2601/380/76  GCS:76/2221/2145  pend:456 rates:43/2000 lat:32/106/67 bad:0/9 txbuf:91/100
+Veh:2652/390/78  GCS:78/2278/2200  pend:452 rates:43/1500 lat:32/106/66 bad:0/9 txbuf:88/100
+Veh:2720/400/80  GCS:80/2339/2259  pend:461 rates:43/2000 lat:32/106/66 bad:0/9 txbuf:93/100
+Veh:2788/410/82  GCS:82/2398/2316  pend:472 rates:43/2000 lat:32/106/66 bad:0/9 txbuf:97/100
+Veh:2856/420/84  GCS:84/2456/2372  pend:484 rates:43/2000 lat:32/106/66 bad:0/9 txbuf:90/100
+Veh:2924/430/86  GCS:86/2514/2428  pend:496 rates:43/2000 lat:32/106/66 bad:0/9 txbuf:97/100
+Veh:2992/440/88  GCS:88/2575/2487  pend:505 rates:43/2000 lat:32/106/66 bad:0/9 txbuf:91/100
+Veh:3060/448/90  GCS:90/2634/2544  pend:516 rates:43/2000 lat:32/106/66 bad:0/9 txbuf:86/100
+Veh:3128/458/92  GCS:92/2692/2600  pend:528 rates:43/2000 lat:32/106/66 bad:0/9 txbuf:91/100
+Veh:3196/468/94  GCS:94/2756/2662  pend:534 rates:43/2000 lat:32/106/65 bad:0/9 txbuf:96/100
+Veh:3264/478/96  GCS:96/2818/2722  pend:542 rates:43/2000 lat:32/106/65 bad:0/9 txbuf:95/100
+Veh:3332/487/98  GCS:98/2876/2778  pend:554 rates:43/2000 lat:32/106/65 bad:0/9 txbuf:90/100
+Veh:3400/496/100  GCS:100/2932/2832  pend:568 rates:43/2000 lat:32/106/65 bad:0/9 txbuf:86/100
+Veh:3468/508/102  GCS:102/2998/2896  pend:572 rates:43/2000 lat:32/106/65 bad:0/9 txbuf:96/100
+Veh:3536/516/104  GCS:106/3059/2955  pend:581 rates:86/2000 lat:32/106/64 bad:0/9 txbuf:89/100
+Veh:3587/526/106  GCS:108/3109/3003  pend:584 rates:43/1500 lat:32/106/64 bad:0/18 txbuf:97/100
+Veh:3655/536/108  GCS:110/3163/3055  pend:600 rates:43/2000 lat:32/106/64 bad:0/18 txbuf:86/100
+Veh:3723/546/110  GCS:112/3227/3117  pend:606 rates:43/2000 lat:32/106/64 bad:0/18 txbuf:90/100
+Veh:3791/556/112  GCS:114/3284/3172  pend:619 rates:43/2000 lat:32/106/64 bad:0/18 txbuf:86/100
+Veh:3859/566/114  GCS:116/3347/3233  pend:626 rates:43/2000 lat:32/106/63 bad:0/18 txbuf:93/100
+Veh:3927/576/116  GCS:118/3409/3293  pend:634 rates:43/2000 lat:32/106/63 bad:0/18 txbuf:96/100
+Veh:3995/586/118  GCS:120/3464/3346  pend:649 rates:43/2000 lat:32/106/63 bad:0/18 txbuf:86/100
+Veh:4063/596/120  GCS:122/3528/3408  pend:655 rates:43/2000 lat:32/106/63 bad:0/18 txbuf:90/100
+Veh:4131/606/122  GCS:124/3588/3466  pend:665 rates:43/2000 lat:32/106/64 bad:0/18 txbuf:86/100
+Veh:4199/616/124  GCS:126/3649/3525  pend:674 rates:43/2000 lat:32/106/64 bad:0/18 txbuf:96/100
+Veh:4267/626/126  GCS:128/3705/3579  pend:688 rates:43/2000 lat:32/106/65 bad:0/18 txbuf:89/100
+Veh:4335/636/128  GCS:130/3767/3639  pend:696 rates:43/2000 lat:32/106/64 bad:0/18 txbuf:93/98
+Veh:4403/646/130  GCS:132/3828/3698  pend:705 rates:43/2000 lat:32/106/65 bad:0/18 txbuf:86/100
+Veh:4471/656/132  GCS:134/3888/3756  pend:715 rates:43/2000 lat:32/106/66 bad:0/18 txbuf:89/100
+Veh:4539/666/134  GCS:136/3949/3814  pend:725 rates:43/2000 lat:32/106/66 bad:0/18 txbuf:95/98
+Veh:4607/674/136  GCS:138/4003/3867  pend:740 rates:43/2000 lat:32/106/66 bad:0/18 txbuf:96/98
+Veh:4675/684/138  GCS:140/4063/3925  pend:750 rates:43/2000 lat:32/106/66 bad:0/18 txbuf:96/100
+Veh:4743/694/140  GCS:142/4120/3980  pend:763 rates:43/2000 lat:32/106/67 bad:0/18 txbuf:91/100
+Veh:4794/704/142  GCS:144/4184/4042  pend:752 rates:43/1500 lat:32/106/67 bad:0/18 txbuf:89/100
+Veh:4862/714/144  GCS:146/4241/4097  pend:765 rates:43/2000 lat:32/106/68 bad:0/18 txbuf:95/100
+Veh:4930/724/146  GCS:148/4299/4153  pend:777 rates:43/2000 lat:32/106/68 bad:0/18 txbuf:89/100
+Veh:4998/734/148  GCS:150/4356/4208  pend:790 rates:43/2000 lat:32/106/68 bad:0/18 txbuf:94/100
+Veh:5066/744/150  GCS:152/4421/4271  pend:795 rates:43/2000 lat:32/106/68 bad:0/18 txbuf:93/100
+Veh:5134/754/152  GCS:154/4478/4326  pend:808 rates:43/2000 lat:32/106/69 bad:0/18 txbuf:97/100
+Veh:5202/764/154  GCS:156/4533/4379  pend:823 rates:43/2000 lat:32/106/69 bad:0/18 txbuf:86/100
+Veh:5270/774/156  GCS:158/4589/4433  pend:837 rates:43/2000 lat:32/106/69 bad:0/18 txbuf:91/100
+Veh:5338/784/158  GCS:160/4644/4486  pend:852 rates:43/2000 lat:32/106/70 bad:0/18 txbuf:94/100
+Veh:5406/794/160  GCS:162/4709/4549  pend:857 rates:43/2000 lat:32/106/70 bad:0/18 txbuf:96/100
+Veh:5474/804/162  GCS:164/4768/4606  pend:868 rates:43/2000 lat:32/106/70 bad:0/18 txbuf:92/100
+Veh:5542/814/164  GCS:166/4826/4662  pend:880 rates:43/2000 lat:32/106/70 bad:0/18 txbuf:96/100
+Veh:5610/824/166  GCS:168/4885/4719  pend:891 rates:43/2000 lat:32/106/70 bad:0/18 txbuf:90/100
+Veh:5678/834/168  GCS:170/4944/4776  pend:902 rates:43/2000 lat:32/106/70 bad:0/18 txbuf:93/100
+Veh:5746/842/170  GCS:172/5006/4836  pend:910 rates:43/2000 lat:32/106/70 bad:0/18 txbuf:94/100
+Veh:5814/854/172  GCS:174/5067/4895  pend:919 rates:43/2000 lat:32/106/70 bad:0/18 txbuf:96/100
+Veh:5865/862/174  GCS:176/5121/4947  pend:918 rates:43/1500 lat:32/106/70 bad:0/18 txbuf:89/100
+Veh:5933/872/176  GCS:178/5182/5006  pend:927 rates:43/2000 lat:32/106/70 bad:0/18 txbuf:97/100
+Veh:6001/882/178  GCS:180/5242/5064  pend:937 rates:43/2000 lat:32/106/70 bad:0/18 txbuf:89/100
+Veh:6069/892/180  GCS:182/5305/5125  pend:944 rates:43/2000 lat:32/106/70 bad:0/18 txbuf:97/100
+Veh:6137/902/182  GCS:184/5363/5181  pend:956 rates:43/2000 lat:32/106/69 bad:0/28 txbuf:91/100
+Veh:6205/912/184  GCS:186/5423/5239  pend:966 rates:43/2000 lat:32/106/69 bad:0/28 txbuf:93/100
+Veh:6273/922/186  GCS:188/5487/5301  pend:972 rates:43/2000 lat:32/106/69 bad:0/28 txbuf:89/100
+Veh:6341/932/188  GCS:190/5550/5362  pend:979 rates:43/2000 lat:32/106/69 bad:0/28 txbuf:96/100
+Veh:6409/942/190  GCS:192/5606/5416  pend:993 rates:43/2000 lat:32/106/69 bad:0/28 txbuf:89/100
+Veh:6477/952/192  GCS:194/5664/5472  pend:1005 rates:43/2000 lat:32/106/68 bad:0/28 txbuf:89/100
+Veh:6545/962/194  GCS:196/5721/5527  pend:1018 rates:43/2000 lat:32/106/68 bad:0/28 txbuf:86/100
+Veh:6613/972/196  GCS:198/5784/5588  pend:1025 rates:43/2000 lat:32/106/68 bad:0/28 txbuf:89/98
+Veh:6681/980/198  GCS:198/5845/5647  pend:1034 rates:0/2000 lat:31/106/67 bad:0/28 txbuf:89/98
+Veh:6749/990/200  GCS:200/5896/5696  pend:1053 rates:43/2000 lat:31/106/67 bad:0/28 txbuf:96/100
+Veh:6800/1000/202  GCS:202/5951/5749  pend:1051 rates:43/1500 lat:31/106/68 bad:0/28 txbuf:88/100
+Veh:6868/1010/204  GCS:204/6013/5809  pend:1059 rates:43/2000 lat:31/106/68 bad:0/28 txbuf:91/100
+Veh:6936/1020/206  GCS:206/6076/5870  pend:1066 rates:43/2000 lat:31/106/68 bad:0/28 txbuf:89/100
+Veh:7004/1030/208  GCS:208/6133/5925  pend:1079 rates:43/2000 lat:31/106/68 bad:0/28 txbuf:96/100
+
+with opresend fix:
+
+kevinh@kevin-xeralaptop:~/development/drone/SiK/Firmware$ tools/mavtester.py --port1=/dev/ttyUSB0 --port2=/dev/ttyUSB1 --rate=4
+Veh:51/6/0  GCS:0/43/43  pend:8 rates:0/1500 lat:0/0/0 bad:0/0 txbuf:93/100
+Veh:119/16/2  GCS:2/95/93  pend:26 rates:43/2000 lat:48/48/48 bad:0/0 txbuf:87/98
+Veh:187/26/4  GCS:4/152/148  pend:39 rates:43/2000 lat:48/108/78 bad:0/0 txbuf:91/98
+Veh:255/36/6  GCS:6/214/208  pend:47 rates:43/2000 lat:42/108/66 bad:0/0 txbuf:93/98
+Veh:323/46/8  GCS:8/274/266  pend:57 rates:43/2000 lat:42/108/74 bad:0/0 txbuf:87/100
+Veh:391/56/10  GCS:10/337/327  pend:64 rates:43/2000 lat:42/108/78 bad:0/0 txbuf:91/100
+Veh:459/66/12  GCS:12/396/384  pend:75 rates:43/2000 lat:42/108/80 bad:0/0 txbuf:91/100
+Veh:527/76/14  GCS:14/452/438  pend:89 rates:43/2000 lat:42/108/82 bad:0/0 txbuf:87/100
+Veh:595/86/16  GCS:16/512/496  pend:99 rates:43/2000 lat:42/108/82 bad:0/0 txbuf:91/100
+Veh:663/94/18  GCS:18/575/557  pend:106 rates:43/2000 lat:42/108/82 bad:0/0 txbuf:82/100
+Veh:714/104/20  GCS:20/634/614  pend:100 rates:43/1500 lat:42/108/83 bad:0/0 txbuf:94/100
+Veh:782/114/22  GCS:22/690/668  pend:114 rates:43/2000 lat:42/108/83 bad:0/0 txbuf:87/100
+Veh:850/124/24  GCS:24/744/720  pend:130 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:93/100
+Veh:918/134/26  GCS:26/800/774  pend:144 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:87/100
+Veh:986/144/28  GCS:28/859/831  pend:155 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:87/100
+Veh:1054/154/30  GCS:30/920/890  pend:164 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:91/100
+Veh:1122/164/32  GCS:32/974/942  pend:180 rates:43/2000 lat:42/108/85 bad:0/0 txbuf:94/100
+Veh:1190/174/34  GCS:34/1030/996  pend:194 rates:43/2000 lat:42/108/85 bad:0/0 txbuf:90/100
+Veh:1258/184/36  GCS:36/1089/1053  pend:205 rates:43/2000 lat:42/108/85 bad:0/0 txbuf:91/100
+Veh:1326/194/38  GCS:38/1152/1114  pend:212 rates:43/2000 lat:42/108/85 bad:0/0 txbuf:88/100
+Veh:1394/204/40  GCS:40/1214/1174  pend:220 rates:43/2000 lat:42/108/86 bad:0/0 txbuf:90/100
+Veh:1462/212/42  GCS:42/1266/1224  pend:238 rates:43/2000 lat:42/108/85 bad:0/0 txbuf:94/100
+Veh:1530/222/44  GCS:44/1329/1285  pend:245 rates:43/2000 lat:42/108/85 bad:0/0 txbuf:90/100
+Veh:1581/232/46  GCS:46/1387/1341  pend:240 rates:43/1500 lat:42/108/84 bad:0/0 txbuf:87/100
+Veh:1649/242/48  GCS:48/1442/1394  pend:255 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:90/100
+Veh:1717/252/50  GCS:50/1498/1448  pend:269 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:94/100
+Veh:1785/262/52  GCS:52/1561/1509  pend:276 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:89/100
+Veh:1853/272/54  GCS:54/1621/1567  pend:286 rates:43/2000 lat:42/108/83 bad:0/0 txbuf:93/100
+Veh:1921/282/56  GCS:56/1681/1625  pend:296 rates:43/2000 lat:42/108/83 bad:0/0 txbuf:88/100
+Veh:1989/292/58  GCS:58/1732/1674  pend:315 rates:43/2000 lat:42/108/83 bad:0/0 txbuf:91/100
+Veh:2057/302/60  GCS:60/1792/1732  pend:325 rates:43/2000 lat:42/108/83 bad:0/0 txbuf:92/100
+Veh:2125/312/62  GCS:62/1853/1791  pend:334 rates:43/2000 lat:42/108/83 bad:0/0 txbuf:87/100
+Veh:2193/322/64  GCS:64/1913/1849  pend:344 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:87/100
+Veh:2261/331/66  GCS:66/1971/1905  pend:356 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:90/100
+Veh:2329/340/68  GCS:68/2020/1952  pend:377 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:91/100
+Veh:2380/350/70  GCS:70/2081/2011  pend:369 rates:43/1500 lat:42/108/84 bad:0/0 txbuf:93/100
+Veh:2448/360/72  GCS:72/2136/2064  pend:384 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:87/100
+Veh:2516/370/74  GCS:74/2190/2116  pend:400 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:91/100
+Veh:2584/380/76  GCS:76/2253/2177  pend:407 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:94/100
+Veh:2652/390/78  GCS:78/2314/2236  pend:416 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:86/100
+Veh:2720/400/80  GCS:80/2373/2293  pend:427 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:93/100
+Veh:2788/410/82  GCS:82/2430/2348  pend:440 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:92/100
+Veh:2856/420/84  GCS:84/2491/2407  pend:449 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:93/100
+Veh:2924/430/86  GCS:86/2548/2462  pend:462 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:86/100
+Veh:2992/439/88  GCS:88/2609/2521  pend:471 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:90/100
+Veh:3060/448/90  GCS:90/2670/2580  pend:480 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:93/100
+Veh:3111/458/92  GCS:92/2734/2642  pend:469 rates:43/1500 lat:42/108/84 bad:0/0 txbuf:93/100
+Veh:3179/468/94  GCS:94/2785/2691  pend:488 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:91/100
+Veh:3247/478/96  GCS:96/2840/2744  pend:503 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:96/100
+Veh:3315/488/98  GCS:98/2900/2802  pend:513 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:86/100
+Veh:3383/498/100  GCS:100/2963/2863  pend:520 rates:43/2000 lat:42/108/84 bad:0/0 txbuf:93/100
+Veh:3451/508/102  GCS:102/3020/2918  pend:533 rates:43/2000 lat:42/108/85 bad:0/0 txbuf:86/100
+Veh:3519/518/104  GCS:104/3078/2974  pend:545 rates:43/2000 lat:42/108/85 bad:0/0 txbuf:88/100
+Veh:3587/528/106  GCS:106/3139/3033  pend:554 rates:43/2000 lat:42/108/85 bad:0/0 txbuf:83/100
+Veh:3655/538/108  GCS:108/3201/3093  pend:562 rates:43/2000 lat:42/108/85 bad:0/0 txbuf:88/100
+Veh:3723/548/110  GCS:110/3264/3154  pend:569 rates:43/2000 lat:42/108/85 bad:0/0 txbuf:94/100
+Veh:3791/557/112  GCS:112/3328/3216  pend:575 rates:43/2000 lat:42/108/85 bad:0/0 txbuf:88/100
+Veh:3859/566/114  GCS:114/3386/3272  pend:587 rates:43/2000 lat:42/108/86 bad:0/0 txbuf:91/100
+Veh:3927/576/116  GCS:116/3446/3330  pend:597 rates:43/2000 lat:42/108/86 bad:0/0 txbuf:88/100
+Veh:3995/586/118  GCS:118/3500/3382  pend:613 rates:43/2000 lat:42/108/86 bad:0/0 txbuf:94/100
+Veh:4046/596/120  GCS:120/3558/3438  pend:608 rates:43/1500 lat:42/108/86 bad:0/0 txbuf:91/100
+Veh:4114/606/122  GCS:122/3618/3496  pend:618 rates:43/2000 lat:42/108/86 bad:0/0 txbuf:90/100
+Veh:4182/616/124  GCS:124/3676/3552  pend:630 rates:43/2000 lat:42/108/86 bad:0/0 txbuf:94/100
+Veh:4250/626/126  GCS:126/3736/3610  pend:640 rates:43/2000 lat:42/108/86 bad:0/0 txbuf:91/100
+Veh:4318/636/128  GCS:128/3793/3665  pend:653 rates:43/2000 lat:42/108/86 bad:0/0 txbuf:87/100
+Veh:4386/646/130  GCS:130/3846/3716  pend:670 rates:43/2000 lat:42/108/86 bad:0/0 txbuf:91/100
+Veh:4454/656/132  GCS:132/3909/3777  pend:677 rates:43/2000 lat:42/108/86 bad:0/0 txbuf:93/100
+Veh:4522/666/134  GCS:134/3971/3837  pend:685 rates:43/2000 lat:42/108/86 bad:0/0 txbuf:88/100
+Veh:4590/676/136  GCS:136/4028/3892  pend:698 rates:43/2000 lat:42/108/86 bad:0/0 txbuf:91/100
+Veh:4658/684/138  GCS:138/4081/3943  pend:715 rates:43/2000 lat:42/108/87 bad:0/0 txbuf:91/100
+Veh:4726/694/140  GCS:140/4141/4001  pend:725 rates:43/2000 lat:42/108/87 bad:0/0 txbuf:94/100
+Veh:4777/704/142  GCS:142/4205/4063  pend:714 rates:43/1500 lat:42/108/87 bad:0/0 txbuf:93/100
+Veh:4845/714/144  GCS:144/4260/4116  pend:729 rates:43/2000 lat:42/108/87 bad:0/0 txbuf:86/100
+Veh:4913/724/146  GCS:146/4317/4171  pend:742 rates:43/2000 lat:42/108/87 bad:0/0 txbuf:87/100
+Veh:4981/734/148  GCS:148/4373/4225  pend:756 rates:43/2000 lat:42/108/87 bad:0/0 txbuf:91/100
+Veh:5049/744/150  GCS:150/4432/4282  pend:767 rates:43/2000 lat:42/108/87 bad:0/0 txbuf:90/100
+Veh:5117/754/152  GCS:152/4492/4340  pend:777 rates:43/2000 lat:42/108/88 bad:0/0 txbuf:86/100
+Veh:5185/764/154  GCS:154/4553/4399  pend:786 rates:43/2000 lat:42/108/88 bad:0/0 txbuf:91/100
+Veh:5253/774/156  GCS:156/4611/4455  pend:798 rates:43/2000 lat:42/108/88 bad:0/0 txbuf:94/100
+Veh:5321/783/158  GCS:158/4667/4509  pend:812 rates:43/2000 lat:42/108/88 bad:0/0 txbuf:93/100
+Veh:5389/793/160  GCS:160/4732/4572  pend:817 rates:43/2000 lat:42/108/88 bad:0/0 txbuf:87/100
+Veh:5457/804/162  GCS:162/4794/4632  pend:825 rates:43/2000 lat:42/108/88 bad:0/0 txbuf:91/100
+Veh:5525/812/164  GCS:166/4848/4684  pend:841 rates:86/2000 lat:42/108/89 bad:0/0 txbuf:92/100
+Veh:5576/822/166  GCS:168/4908/4742  pend:834 rates:43/1500 lat:42/108/89 bad:0/0 txbuf:91/100
+Veh:5644/832/168  GCS:168/4966/4798  pend:846 rates:0/2000 lat:42/108/88 bad:0/0 txbuf:87/98
+Veh:5712/842/170  GCS:170/5021/4851  pend:861 rates:43/2000 lat:42/108/88 bad:0/0 txbuf:93/100
+Veh:5780/852/172  GCS:172/5079/4907  pend:873 rates:43/2000 lat:42/108/88 bad:0/0 txbuf:91/98
+Veh:5848/862/174  GCS:174/5137/4963  pend:885 rates:43/2000 lat:42/108/88 bad:0/0 txbuf:88/100
+Veh:5916/872/176  GCS:176/5194/5018  pend:898 rates:43/2000 lat:42/108/88 bad:0/0 txbuf:94/100
+Veh:5984/882/178  GCS:178/5246/5068  pend:916 rates:43/2000 lat:42/108/88 bad:0/0 txbuf:90/100
+Veh:6052/890/180  GCS:180/5308/5128  pend:924 rates:43/2000 lat:42/108/88 bad:0/0 txbuf:93/98
+Veh:6120/900/182  GCS:182/5362/5180  pend:940 rates:43/2000 lat:42/108/87 bad:0/0 txbuf:94/98
+Veh:6188/910/184  GCS:184/5408/5224  pend:964 rates:43/2000 lat:42/108/87 bad:0/0 txbuf:91/98
+
+
+hmm - I fixed the following 'problem': and saw that bad stayed zero, but then tried running the tool and bad started going up.  Duh, until
+the receiver has 'synced up' with whatever mavlink crap was left in the fifos from the previous test, 'bad' is meaningless:
+
+kevinh@kevin-xeralaptop:~/development/drone/SiK/Firmware$ tools/mavtester.py --port1=/dev/ttyUSB0 --port2=/dev/ttyUSB1 --rate=4
+Veh:51/6/0  GCS:0/0/0  pend:51 rates:0/1500 lat:0/0/0 bad:0/75 txbuf:90/100
+Veh:119/16/2  GCS:2/0/0  pend:119 rates:43/2000 lat:44/44/44 bad:0/180 txbuf:93/100
+Veh:187/26/4  GCS:4/0/0  pend:187 rates:43/2000 lat:44/44/44 bad:0/285 txbuf:85/100
+Veh:255/36/6  GCS:6/80/78  pend:177 rates:43/2000 lat:43/44/43 bad:0/309 txbuf:91/98
+Veh:323/46/8  GCS:8/158/154  pend:169 rates:43/2000 lat:42/44/43 bad:0/335 txbuf:91/98   [ NOW WE ARE SYNCED, BAD IS NOW MEANINGFUL ]
+Veh:391/56/10  GCS:10/221/215  pend:176 rates:43/2000 lat:34/44/41 bad:0/335 txbuf:90/100
+Veh:459/66/12  GCS:12/279/271  pend:188 rates:43/2000 lat:34/44/41 bad:0/335 txbuf:94/98
+Veh:527/76/14  GCS:14/342/332  pend:195 rates:43/2000 lat:34/44/41 bad:0/335 txbuf:88/98
+Veh:595/86/16  GCS:16/401/389  pend:206 rates:43/2000 lat:34/44/41 bad:0/335 txbuf:82/100
+Veh:663/96/18  GCS:18/454/440  pend:223 rates:43/2000 lat:34/44/40 bad:0/335 txbuf:91/100
+Veh:731/104/20  GCS:20/512/496  pend:235 rates:43/2000 lat:34/44/40 bad:0/335 txbuf:96/100
+Veh:799/116/22  GCS:22/572/554  pend:245 rates:43/2000 lat:34/107/46 bad:0/335 txbuf:94/100
+Veh:867/124/24  GCS:24/627/607  pend:260 rates:43/2000 lat:34/107/46 bad:0/335 txbuf:93/98
+Veh:918/132/26  GCS:26/684/662  pend:256 rates:43/1500 lat:34/107/45 bad:0/335 txbuf:94/100
+Veh:986/142/28  GCS:28/743/719  pend:267 rates:43/2000 lat:34/107/49 bad:0/335 txbuf:88/100
+Veh:1054/152/30  GCS:30/797/771  pend:283 rates:43/2000 lat:34/107/51 bad:0/335 txbuf:91/100
+...
+Veh:9911/1458/296  GCS:296/8477/8185  pend:1726 rates:43/2000 lat:34/113/84 bad:0/335 txbuf:93/100
+
+
+
+higher rates still show problems - possibly due to partial packets being shoved into full fifos? - do not fix?
+
+kevinh@kevin-xeralaptop:~/development/drone/SiK/Firmware$ tools/mavtester.py --port1=/dev/ttyUSB0 --port2=/dev/ttyUSB1 --rate=20
+Veh:289/8/0  GCS:0/52/52  pend:237 rates:0/8500 lat:0/0/0 bad:0/0 txbuf:0/100
+Veh:544/18/2  GCS:4/77/75  pend:469 rates:86/7500 lat:54/54/54 bad:0/21 txbuf:0/100
+Veh:748/24/4  GCS:6/79/77  pend:671 rates:43/6000 lat:54/355/204 bad:0/31 txbuf:0/100
+Veh:952/26/6  GCS:8/79/77  pend:875 rates:43/6000 lat:54/355/181 bad:0/44 txbuf:0/100
+Veh:1156/28/8  GCS:10/79/77  pend:1079 rates:43/6000 lat:54/355/180 bad:0/57 txbuf:0/100
+Veh:1360/32/10  GCS:12/81/79  pend:1281 rates:43/6000 lat:54/355/179 bad:0/67 txbuf:0/100
+Veh:1564/36/12  GCS:14/81/79  pend:1485 rates:43/6000 lat:54/355/179 bad:0/80 txbuf:0/100
+Veh:1768/38/14  GCS:16/81/79  pend:1689 rates:43/6000 lat:54/355/191 bad:0/92 txbuf:0/100
+Veh:1972/40/16  GCS:18/81/79  pend:1893 rates:43/6000 lat:54/355/189 bad:0/105 txbuf:0/100
+Veh:2176/46/18  GCS:20/81/79  pend:2097 rates:43/6000 lat:54/355/188 bad:0/117 txbuf:0/100
+Veh:2380/51/20  GCS:22/81/79  pend:2301 rates:43/6000 lat:54/355/187 bad:0/129 txbuf:0/100
+Veh:2584/54/22  GCS:24/83/81  pend:2503 rates:43/6000 lat:54/355/194 bad:0/139 txbuf:0/100
+Veh:2788/61/24  GCS:26/84/82  pend:2706 rates:43/6000 lat:54/355/183 bad:0/153 txbuf:0/100
+Veh:2992/66/26  GCS:28/87/83  pend:2909 rates:43/6000 lat:54/355/189 bad:0/163 txbuf:0/100
+

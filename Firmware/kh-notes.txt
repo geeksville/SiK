@@ -1,0 +1,138 @@
+Looking into the strange SiK wavelength thing again (where using a _larger_ frequency band can cause lost links).   I've figured out the best way to make the problem disappear: Don't look at it for two months.  I'm having a hard time reproducing now with the same settings/code that definitely showed a problem before.  Frustrating, but will solve.
+
+* tried doubling silence_period - no change
+
+* tried turning off BONUS time no change
+
+* could temperature_update() be a problem?
+
+* If hub power is cycled the two modems take a long time to sync up (need small random delay?)
+
+* FIXME: my no rcv msg might not be correct? should check state?
+
+* USB hubs/old new have same behavior
+
+* Using wider frequency band causes loss of lock, but we are missing many receive windows anyways even with the 915000 base
+
+* Using wider band: No rcv on ch 39, drop 100, good 519 (20% drop rate), using narrow: No rcv on ch 5, drop 103, good 515 (same)
+
+* Doing ATZ on the USB0 modems makes the problem repeatible? (using old usb hub)
+
+* Using too high a power causes more dropped packets (saturating rcvr?)
+* Using 10 channels rather than 50 doesn't help
+
+ATZ
+ATZ�ulock 6
+ulock 7
+ulock 8
+FH lock
+clear ulock
+ulock 6
+ulock 7
+ulock 8
+ulock 9
+clear ulock
+ulock 6
+ulock 7
+
+The following values show the problem:
+
+S0:FORMAT=25
+S1:SERIAL_SPEED=57
+S2:AIR_SPEED=64
+S3:NETID=23 (Using 97 has the same behavior - so it is confirmed that NETID doesn't have anything to do with the problem)
+S4:TXPOWER=20
+S5:ECC=1
+S6:MAVLINK=1
+S7:OPPRESEND=1
+S8:MIN_FREQ=902000 *** shows problem ***
+S9:MAX_FREQ=928000
+S10:NUM_CHANNELS=50
+S11:DUTY_CYCLE=100
+S12:LBT_RSSI=0
+S13:MANCHESTER=0
+S14:RTSCTS=0
+S15:MAX_WINDOW=131
+
+However, if I use 
+
+S8:MIN_FREQ=915000
+
+Then the problem does not occur.  I don't think this problem is related to any of the latency changes - but rather something else that is busted.  I've used up my debugging time limit for today ;-) but I'll poke at this more over the weekend.  Hopefully I'll have a fix by the devcall.
+
+
+------
+
+
+With wiprebase:
+Veh:220541/32324/6642  GCS:6642/190868/184246  pend:36295 rates:43/2000 lat:30/127/78 bad:0/445 txbuf:87/100
+Veh:220592/32334/6644  GCS:6644/190922/184298  pend:36294 rates:43/1500 lat:30/127/78 bad:0/445 txbuf:85/98
+
+with tridgewip (the 1.8 release):
+Veh:52513/7710/1580  GCS:1580/45640/44062  pend:8451 rates:43/2000 lat:36/123/75 bad:0/75 txbuf:88/100
+Veh:52581/7720/1582  GCS:1582/45697/44117  pend:8464 rates:43/2000 lat:36/123/75 bad:0/75 txbuf:90/100
+Veh:52649/7730/1584  GCS:1584/45753/44171  pend:8478 rates:43/2000 lat:36/123/75 bad:0/75 txbuf:94/100
+Veh:107967/15812/3252  GCS:3252/93894/90648  pend:17319 rates:43/2000 lat:26/123/76 bad:0/157 txbuf:92/100
+Veh:108035/15820/3254  GCS:3254/93950/90702  pend:17333 rates:43/2000 lat:26/123/76 bad:0/157 txbuf:94/100
+
+
+Original settings
+ATI5
+S0: FORMAT=25
+S1: SERIAL_SPEED=57
+S2: AIR_SPEED=64
+S3: NETID=23
+S4: TXPOWER=20
+S5: ECC=1
+S6: MAVLINK=1
+S7: OPPRESEND=1
+S8: MIN_FREQ=902000
+S9: MAX_FRE00
+S10: NUM_CHANNELS=50
+S11: DUTY_CYCLE=100
+S12: LBT_RSSI=0
+S13: MANCHESTER=0
+S14: RTSCTS=0
+
+ATI - show radio version
+ATI2 - show board type
+ATI3 - show board frequency
+ATI4 - show board version
+ATI5 - show all user settable EEPROM parameters
+ATI6 - display TDM timing report
+ATI7 - display RSSI signal report
+ATO - exit AT command mode
+ATSn? - display radio parameter number 'n'
+ATSn=X - set radio parameter number 'n' to 'X'
+ATZ - reboot the radio
+AT&W - write current parameters to EEPROM
+AT&F - reset all parameters to factory default
+AT&T=RSSI - enable RSSI debug reporting
+AT&T=TDM - enable TDM debug reporting
+AT&T - disable debug reporting
+
+
+Andrew Tridgell: rc 3 1800
+[15:43:44] Andrew Tridgell: that sets RC3 to 1800
+[15:43:55] Andrew Tridgell: rc 3 0 means "hand control back to real RC"
+[15:54:26] Kevin Hester: oh right!  got it
+
+baseline latency - old sw, no traffic
+
+Recieved override, latency 73ms
+Recieved override, latency 111ms
+Recieved override, latency 66ms
+Recieved override, latency 43ms
+Recieved override, latency 60ms
+Recieved override, latency 115ms
+Recieved override, latency 68ms
+Recieved override, latency 158ms
+Recieved override, latency 112ms
+Recieved override, latency 67ms
+Recieved override, latency 40ms
+Recieved override, latency 124ms
+Recieved override, latency 78ms
+
+to do:
+use micros() to measure times
+

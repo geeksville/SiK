@@ -40,7 +40,7 @@
 __pdata uint8_t num_fh_channels;
 
 /// whether we current have good lock with the other end
-static bool have_radio_lock;
+bool have_radio_lock;
 
 /// current transmit channel
 /// This changes every time the TDM transmit window opens or closes,
@@ -52,7 +52,7 @@ __pdata static volatile uint8_t transmit_channel;
 /// follows the transmit channel. When we don't have lock the receive
 /// channel only changes
 /// very slowly - it moves only when the transmit channel wraps
-__pdata static volatile uint8_t receive_channel;
+__pdata volatile uint8_t receive_channel;
 
 /// map between hopping channel numbers and physical channel numbers
 __xdata static uint8_t channel_map[MAX_FREQ_CHANNELS];
@@ -83,6 +83,9 @@ fhop_init(uint16_t netid)
 	}
 	srand(netid);
 	shuffle(channel_map, num_fh_channels);
+	for (i = 0; i < num_fh_channels; i++) {
+		printf("PHYS,%u,%u\n", i, channel_map[i]);
+	}
 }
 
 // tell the TDM code what channel to transmit on
@@ -120,11 +123,15 @@ fhop_window_change(void)
 void 
 fhop_set_locked(bool locked)
 {
-#if DEBUG
+
 	if (locked && !have_radio_lock) {
-		debug("FH lock\n");
+		printf("FH lock\n");
 	}
-#endif
+
+	if (!locked) {
+		printf("Lost lock\n");
+	}
+
 	have_radio_lock = locked;
 	if (have_radio_lock) {
 		// we have just received a packet, so we know the

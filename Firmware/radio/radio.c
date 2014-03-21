@@ -305,6 +305,10 @@ radio_transmit_simple(__data uint8_t length, __xdata uint8_t * __pdata buf, __pd
 		panic("oversized packet");
 	}
 
+        // no interrupts
+	register_write(EZRADIOPRO_INTERRUPT_ENABLE_1, 0);
+	register_write(EZRADIOPRO_INTERRUPT_ENABLE_2, 0);
+
 	radio_clear_transmit_fifo();
 
 	register_write(EZRADIOPRO_TRANSMIT_PACKET_LENGTH, length);
@@ -317,10 +321,6 @@ radio_transmit_simple(__data uint8_t length, __xdata uint8_t * __pdata buf, __pd
 	radio_write_transmit_fifo(n, buf);
 	length -= n;
 	buf += n;
-
-	// no interrupts
-	register_write(EZRADIOPRO_INTERRUPT_ENABLE_1, 0);
-	register_write(EZRADIOPRO_INTERRUPT_ENABLE_2, 0);
 
 	preamble_detected = 0;
 	transmit_started = false;
@@ -368,7 +368,7 @@ radio_transmit_simple(__data uint8_t length, __xdata uint8_t * __pdata buf, __pd
 		if (status & EZRADIOPRO_IFFERR) {
 			// we ran out of bytes in the FIFO
 			radio_clear_transmit_fifo();
-			debug("FFERR %u\n", (unsigned)length);
+			printf("FFERR %u\n", (unsigned)length);
 			if (errors.tx_errors != 0xFFFF) {
 				errors.tx_errors++;
 			}
@@ -387,7 +387,7 @@ radio_transmit_simple(__data uint8_t length, __xdata uint8_t * __pdata buf, __pd
 			// transmitter has finished. See if we got the
 			// whole packet out
 			if (length != 0) {
-				debug("TX short %u\n", (unsigned)length);
+				printf("TX short %u\n", (unsigned)length);
 				if (errors.tx_errors != 0xFFFF) {
 					errors.tx_errors++;
 				}
@@ -399,7 +399,7 @@ radio_transmit_simple(__data uint8_t length, __xdata uint8_t * __pdata buf, __pd
 	}
 
 	// transmit timeout ... clear the FIFO
-	debug("TX timeout %u ts=%u tn=%u len=%u\n",
+	printf("TX timeout %u ts=%u tn=%u len=%u\n",
 	       timeout_ticks,
 	       tstart,
 	       timer2_tick(),

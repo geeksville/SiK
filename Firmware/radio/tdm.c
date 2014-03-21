@@ -42,7 +42,7 @@
 #include "freq_hopping.h"
 #include "crc.h"
 
-#define USE_TICK_YIELD 1
+#define USE_TICK_YIELD 0
 
 /// the state of the tdm system
 enum tdm_state { TDM_TRANSMIT=0, TDM_SILENCE1=1, TDM_RECEIVE=2, TDM_SILENCE2=3 };
@@ -146,6 +146,10 @@ __pdata struct tdm_trailer trailer;
 static bool send_at_command;
 static __pdata char remote_at_cmd[AT_CMD_MAXLEN + 1];
 
+extern __pdata volatile uint8_t receive_channel;
+
+	static uint8_t unlock_count, temperature_count;
+
 #define PACKET_OVERHEAD (sizeof(trailer)+16)
 
 /// display RSSI output
@@ -233,6 +237,7 @@ sync_tx_windows(__pdata uint8_t packet_length)
 		// we are in the other radios transmit window, our
 		// receive window
 		tdm_state = TDM_RECEIVE;
+                if(!at_mode_active) printf("slide %u,%u,%u\n", tdm_state,tdm_state_remaining, trailer.window);
 		tdm_state_remaining = trailer.window;
 	}
 
@@ -261,6 +266,11 @@ sync_tx_windows(__pdata uint8_t packet_length)
 	}
 }
 
+extern bool have_radio_lock;
+
+uint16_t num_drop, num_total;
+// uint16_t bad_rssi_avg;
+
 /// update the TDM state machine
 ///
 static void
@@ -276,6 +286,25 @@ tdm_state_update(__pdata uint16_t tdelta)
 
 	// have we passed the next transition point?
 	while (tdelta >= tdm_state_remaining) {
+		if(tdm_state == TDM_SILENCE2) { // Warn if we don't receive _any_ packets during a receive window
+		  if(have_radio_lock) {
+			num_total++;
+		  	if(!received_packet) {
+				if(!at_mode_active) printf("RDROP, %u, %u, %u, %u\n", receive_channel, fhop_receive_channel(), ++num_drop, num_total);
+				// bad_rssi_avg = (radio_current_rssi() + 3*bad_rssi_avg)/4;
+				// printf("RAVG, %u\n", bad_rssi_avg);
+		  	}
+			else {
+				// printf("RGOOD, %u, %u, %u, %u\n", receive_channel, fhop_receive_channel(), num_drop, num_total);
+received_packet = false;
+unlock_count = 0;
+			  }
+                        }
+		  else {
+			num_total = 0; num_drop = 0;
+			}	
+		  }
+
 		// advance the tdm state machine
 		tdm_state = (tdm_state+1) % 4;
 
@@ -360,22 +389,24 @@ static void temperature_update(void)
 	}
 }
 
-
 /// blink the radio LED if we have not received any packets
 ///
 static void
 link_update(void)
 {
-	static uint8_t unlock_count, temperature_count;
 	if (received_packet) {
+		if(unlock_count >= 1)
+			printf("was bad\n");
+
 		unlock_count = 0;
-		received_packet = false;
+		// received_packet = false;
 	} else {
 		unlock_count++;
 	}
 	if (unlock_count < 6) {
 		LED_RADIO = LED_ON;
 	} else {
+		printf("ulock %u\n", unlock_count);
 		LED_RADIO = blink_state;
 		blink_state = !blink_state;
 	}
@@ -622,6 +653,7 @@ tdm_serial_loop(void)
 
 		if (transmit_wait != 0) {
 			// we're waiting for a preamble to turn into a packet
+			printf("bail4\n");
 			continue;
 		}
 
@@ -631,6 +663,7 @@ tdm_serial_loop(void)
 			// a preamble has been detected. Don't
 			// transmit for a while
 			transmit_wait = packet_latency;
+			printf("bail3\n");
 			continue;
 		}
 
@@ -641,6 +674,7 @@ tdm_serial_loop(void)
 
 		if (duty_cycle_wait) {
 			// we're waiting for our duty cycle to drop
+			printf("bail2\n");
 			continue;
 		}
 
@@ -648,11 +682,13 @@ tdm_serial_loop(void)
 		// have left?
 		if (tdm_state_remaining < packet_latency) {
 			// none ....
+			printf("bail1\n");
 			continue;
 		}
 		max_xmit = (tdm_state_remaining - packet_latency) / ticks_per_byte;
 		if (max_xmit < PACKET_OVERHEAD) {
 			// can't fit the trailer in with a byte to spare
+			printf("!ecc-bail\n");
 			continue;
 		}
 		max_xmit -= PACKET_OVERHEAD;
@@ -700,6 +736,7 @@ tdm_serial_loop(void)
 			trailer.window = (uint16_t)(tdm_state_remaining - flight_time_estimate(len+sizeof(trailer)));
 		}
 
+  // KH FIXME: do this earlier?
 		// set right transmit channel
 		radio_set_channel(fhop_transmit_channel());
 
@@ -740,7 +777,7 @@ tdm_serial_loop(void)
 			lbt_rand = 0;
 		}
 
-		// set right receive channel
+		// set right receive channel (now that we are don't transmitting)
 		radio_set_channel(fhop_receive_channel());
 
 		// re-enable the receiver
@@ -810,8 +847,9 @@ tdm_build_timing_table(void)
 	}
 	feature_golay = golay_saved;
 }
+#endif
 
-
+#if 0
 // test hardware CRC code
 static void 
 crc_test(void)
@@ -874,18 +912,21 @@ tdm_init(void)
 #define REGULATORY_MAX_WINDOW (((1000000UL/16)*4)/10)
 #define LBT_MIN_TIME_USEC 5000
 
-	// tdm_build_timing_table();
+        // tdm_build_timing_table();
 
 	// calculate how many 16usec ticks it takes to send each byte
 	ticks_per_byte = (8+(8000000UL/(air_rate*1000UL)))/16;
         ticks_per_byte++;
+
+        ticks_per_byte -= 0;
+        printf("ticks per %u\n", ticks_per_byte);
 
 	// calculate the minimum packet latency in 16 usec units
 	// we initially assume a preamble length of 40 bits, then
 	// adjust later based on actual preamble length. This is done
 	// so that if one radio has antenna diversity and the other
 	// doesn't, then they will both using the same TDM round timings
-	packet_latency = (8+(10/2)) * ticks_per_byte + 13;
+	packet_latency = (8+(10/2)) * ticks_per_byte + 13 /* - 10 */; // 10 is almost equal on slide numbers
 
 	if (feature_golay) {
 		max_data_packet_length = (MAX_PACKET_LENGTH/2) - (6+sizeof(trailer));
@@ -900,7 +941,7 @@ tdm_init(void)
 	}
 
 	// set the silence period to two times the packet latency
-        silence_period = 2*packet_latency;
+        silence_period = 2*packet_latency; 
 
         // set the transmit window to allow for 3 full sized packets
 	window_width = 3*(packet_latency+(max_data_packet_length*(uint32_t)ticks_per_byte));
