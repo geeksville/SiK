@@ -108,7 +108,7 @@ struct mavlink_RADIO_v10 {
 	uint16_t fixed;
 	uint8_t rssi;
 	uint8_t remrssi;
-	uint8_t txbuf;
+	uint8_t txbuf; // Note: If antenna diversity is used (RFD900) the upper bit is repurposed to indicate 1 for antenna 2, 0 for antenna 1
 	uint8_t noise;
 	uint8_t remnoise;
 };
@@ -137,6 +137,9 @@ void MAVLink_report(void)
         m->rxerrors = errors.rx_errors;
         m->fixed    = errors.corrected_packets;
         m->txbuf    = serial_read_space();
+#if RFD900_DIVERSITY
+        m->txbuf    = (m->txbuf & 0x7f) | (on_second_antenna ? 0x80 : 0);
+#endif
         m->rssi     = statistics.average_rssi;
         m->remrssi  = remote_statistics.average_rssi;
         m->noise    = statistics.average_noise;

@@ -44,6 +44,11 @@ __pdata uint8_t netid[2];
 static volatile __bit packet_received;
 static volatile __bit preamble_detected;
 
+// Are we using the second antenna (only used if antenna diversity is on)
+// This is not placed into the statistics structure because it seems to grow the structure by one byte in that case.  We really want to
+// burn the minimum amount of space for this feature
+volatile __bit on_second_antenna;
+
 __pdata struct radio_settings settings;
 
 
@@ -1169,15 +1174,21 @@ INTERRUPT(Receiver_ISR, INTERRUPT_INT0)
 		}
 		read_receive_fifo(RX_FIFO_THRESHOLD_HIGH, &radio_buffer[partial_packet_length]);
 		partial_packet_length += RX_FIFO_THRESHOLD_HIGH;
-		last_rssi = register_read(EZRADIOPRO_RECEIVED_SIGNAL_STRENGTH_INDICATOR);
 	}
 
-	if (status2 & EZRADIOPRO_IPREAVAL) {
+	if (status2 & EZRADIOPRO_IPREAVAL)
 		// a valid preamble has been detected
 		preamble_detected = true;
 
+    // If we've received preamble or currently receiving payload then rssi is valid
+	if ((status2 & EZRADIOPRO_IPREAVAL) || (status & EZRADIOPRO_IRXFFAFULL)) {
 		// read the RSSI register for logging
 		last_rssi = register_read(EZRADIOPRO_RECEIVED_SIGNAL_STRENGTH_INDICATOR);
+#if RFD900_DIVERSITY
+		// It might be possible to read EZRADIOPRO_GPIO2_CONFIGURATION and look for 0x18 (ant 2) vs 0x17 (ant 1) but I see nothing
+		// In the docs that guarantees that is true (no RFD900 here to test with)
+		on_second_antenna = register_read(EZRADIOPRO_ANTENNA_DIVERSITY_REGISTER_1) < register_read(EZRADIOPRO_ANTENNA_DIVERSITY_REGISTER_2);
+#endif
 	}
 
 	if (feature_golay == false && (status & EZRADIOPRO_ICRCERROR)) {

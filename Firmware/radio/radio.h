@@ -129,6 +129,11 @@ struct statistics {
 };
 __pdata extern struct statistics statistics, remote_statistics;
 
+// Are we using the second antenna (only used if antenna diversity is on)
+// This is not placed into the statistics structure because it seems to grow the structure by one byte in that case.  We really want to
+// burn the minimum amount of space for this feature
+extern volatile __bit on_second_antenna;
+
 struct error_counts {
 	uint16_t rx_errors;		///< count of packet receive errors
 	uint16_t tx_errors;		///< count of packet transmit errors
