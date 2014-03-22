@@ -44,6 +44,9 @@
 
 #define USE_TICK_YIELD 1
 
+/// If set to 1, we show tdm window size fixup in the 'average_noise' status - useful for checking modem timing
+#define TDM_DEBUG 0
+
 /// the state of the tdm system
 enum tdm_state { TDM_TRANSMIT=0, TDM_SILENCE1=1, TDM_RECEIVE=2, TDM_SILENCE2=3 };
 __pdata static enum tdm_state tdm_state;
@@ -233,6 +236,10 @@ sync_tx_windows(__pdata uint8_t packet_length)
 		// we are in the other radios transmit window, our
 		// receive window
 		tdm_state = TDM_RECEIVE;
+#if TDM_DEBUG
+		//if(!at_mode_active) printf("slide %u,%u,%u\n", tdm_state,tdm_state_remaining, trailer.window);
+		statistics.average_noise = trailer.window - tdm_state_remaining;
+#endif
 		tdm_state_remaining = trailer.window;
 	}
 
@@ -637,8 +644,9 @@ tdm_serial_loop(void)
 		// sample the background noise when it is out turn to
 		// transmit, but we are not transmitting,
 		// averaged over around 4 samples
+#if !TDM_DEBUG
 		statistics.average_noise = (radio_current_rssi() + 3*(uint16_t)statistics.average_noise)/4;
-
+#endif
 		if (duty_cycle_wait) {
 			// we're waiting for our duty cycle to drop
 			continue;
